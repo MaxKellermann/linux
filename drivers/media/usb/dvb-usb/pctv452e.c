@@ -446,6 +446,9 @@ static int pctv452e_i2c_msg(struct dvb_usb_device *d, u8 addr,
 	return rcv_len;
 
 failed:
+	if (snd_len == 0 && rcv_len == 1 && buf[5] == 0 && buf[6] == 0)
+		return ret;
+
 	err("I2C error %d; %02X %02X  %02X %02X %02X -> "
 	     "%02X %02X  %02X %02X %02X.",
 	     ret, SYNC_BYTE_OUT, id, addr << 1, snd_len, rcv_len,
