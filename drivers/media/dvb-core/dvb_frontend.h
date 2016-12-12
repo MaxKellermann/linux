@@ -670,6 +670,7 @@ struct dvb_frontend {
 	struct kref refcount;
 	struct dvb_frontend_ops ops;
 	struct dvb_adapter *dvb;
+	struct device *device;
 	void *demodulator_priv;
 	void *tuner_priv;
 	void *frontend_priv;
