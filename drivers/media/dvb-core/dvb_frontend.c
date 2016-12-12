@@ -2617,7 +2617,8 @@ static int dvb_frontend_release(struct inode *inode, struct file *file)
 	if (dvbdev->users == -1) {
 		wake_up(&fepriv->wait_queue);
 #ifdef CONFIG_MEDIA_CONTROLLER_DVB
-		dvb_media_controller_disable_source(fe->dvb, dvbdev->entity);
+		if (fe->dvb)
+			dvb_media_controller_disable_source(fe->dvb, dvbdev->entity);
 #endif
 		if (fe->exit != DVB_FE_NO_EXIT)
 			wake_up(&dvbdev->wait_queue);
@@ -2761,6 +2762,14 @@ int dvb_unregister_frontend(struct dvb_frontend* fe)
 	mutex_lock(&frontend_mutex);
 	dvb_frontend_stop(fe);
 	dvb_remove_device(fepriv->dvbdev);
+
+#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+	if (fe->dvb)
+		dvb_media_controller_disable_source(fe->dvb,
+						    fepriv->dvbdev->entity);
+#endif
+
+	fe->dvb = NULL;
 
 	/* fe is invalid now */
 	mutex_unlock(&frontend_mutex);
