@@ -2558,14 +2558,13 @@ static int dvb_frontend_open(struct inode *inode, struct file *file)
 		fepriv->voltage = -1;
 
 #ifdef CONFIG_MEDIA_CONTROLLER_DVB
-		if (fe->dvb->mdev && fe->dvb->mdev->enable_source) {
-			ret = fe->dvb->mdev->enable_source(dvbdev->entity,
-							   &fepriv->pipe);
-			if (ret) {
-				dev_err(fe->dvb->device,
-					"Tuner is busy. Error %d\n", ret);
-				goto err2;
-			}
+		ret = dvb_media_controller_enable_source(fe->dvb,
+							 dvbdev->entity,
+							 &fepriv->pipe);
+		if (ret) {
+			dev_err(fe->dvb->device,
+				"Tuner is busy. Error %d\n", ret);
+			goto err2;
 		}
 #endif
 		ret = dvb_frontend_start (fe);
@@ -2584,8 +2583,7 @@ static int dvb_frontend_open(struct inode *inode, struct file *file)
 
 err3:
 #ifdef CONFIG_MEDIA_CONTROLLER_DVB
-	if (fe->dvb->mdev && fe->dvb->mdev->disable_source)
-		fe->dvb->mdev->disable_source(dvbdev->entity);
+	dvb_media_controller_disable_source(fe->dvb, dvbdev->entity);
 err2:
 #endif
 	dvb_generic_release(inode, file);
@@ -2617,8 +2615,7 @@ static int dvb_frontend_release(struct inode *inode, struct file *file)
 	if (dvbdev->users == -1) {
 		wake_up(&fepriv->wait_queue);
 #ifdef CONFIG_MEDIA_CONTROLLER_DVB
-		if (fe->dvb->mdev && fe->dvb->mdev->disable_source)
-			fe->dvb->mdev->disable_source(dvbdev->entity);
+		dvb_media_controller_disable_source(fe->dvb, dvbdev->entity);
 #endif
 		if (fe->exit != DVB_FE_NO_EXIT)
 			wake_up(&dvbdev->wait_queue);

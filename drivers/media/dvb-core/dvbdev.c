@@ -768,6 +768,28 @@ int dvb_create_media_graph(struct dvb_adapter *adap,
 	return 0;
 }
 EXPORT_SYMBOL_GPL(dvb_create_media_graph);
+
+int
+dvb_media_controller_enable_source(struct dvb_adapter *adap,
+				   struct media_entity *entity,
+				   struct media_pipeline *pipe)
+{
+	int ret = 0;
+
+	if (adap->mdev && adap->mdev->enable_source)
+		ret = adap->mdev->enable_source(entity, pipe);
+
+	return ret;
+}
+
+void
+dvb_media_controller_disable_source(struct dvb_adapter *adap,
+				    struct media_entity *entity)
+{
+	if (adap->mdev && adap->mdev->disable_source)
+		adap->mdev->disable_source(entity);
+}
+
 #endif
 
 static int dvbdev_check_free_adapter_num(int num)

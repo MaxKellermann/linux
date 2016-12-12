@@ -270,6 +270,22 @@ static inline struct media_device
 {
 	return adap->mdev;
 }
+
+/**
+ * Wrapper for media_device.enable_source().
+ */
+int
+dvb_media_controller_enable_source(struct dvb_adapter *adap,
+				   struct media_entity *entity,
+				   struct media_pipeline *pipe);
+
+/**
+ * Wrapper for media_device.disable_source().
+ */
+void
+dvb_media_controller_disable_source(struct dvb_adapter *adap,
+				    struct media_entity *entity);
+
 #else
 static inline
 int dvb_create_media_graph(struct dvb_adapter *adap,
