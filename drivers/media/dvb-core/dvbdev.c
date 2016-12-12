@@ -776,8 +776,12 @@ dvb_media_controller_enable_source(struct dvb_adapter *adap,
 {
 	int ret = 0;
 
+	mutex_lock(&adap->mdev_lock);
+
 	if (adap->mdev && adap->mdev->enable_source)
 		ret = adap->mdev->enable_source(entity, pipe);
+
+	mutex_unlock(&adap->mdev_lock);
 
 	return ret;
 }
@@ -786,8 +790,12 @@ void
 dvb_media_controller_disable_source(struct dvb_adapter *adap,
 				    struct media_entity *entity)
 {
+	mutex_lock(&adap->mdev_lock);
+
 	if (adap->mdev && adap->mdev->disable_source)
 		adap->mdev->disable_source(entity);
+
+	mutex_unlock(&adap->mdev_lock);
 }
 
 #endif
@@ -856,6 +864,10 @@ int dvb_register_adapter(struct dvb_adapter *adap, const char *name,
 	adap->mfe_shared = 0;
 	adap->mfe_dvbdev = NULL;
 	mutex_init (&adap->mfe_lock);
+
+#ifdef CONFIG_MEDIA_CONTROLLER_DVB
+	mutex_init (&adap->mdev_lock);
+#endif
 
 	list_add_tail (&adap->list_head, &dvb_adapter_list);
 
